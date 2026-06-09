@@ -29,12 +29,12 @@ class _AddLongTaskPageState extends State<AddLongTaskPage> {
       return;
     }
 
-    final newTask = DayTask(
-      title: title,
-      category: category,
-    );
+    // final newTask = DayTask(
+    //   title: title,
+    //   category: category,
+    // );
 
-    Navigator.pop(context, newTask);
+    //Navigator.pop(context, newTask);
   }
 
   @override
@@ -64,7 +64,7 @@ class _AddLongTaskPageState extends State<AddLongTaskPage> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: saveTask,
+              onPressed: () {},//saveTask,
               child: const Text('Save Task'),
             ),
           ],

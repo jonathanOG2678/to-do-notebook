@@ -4,6 +4,11 @@ import 'views/longTermTab.dart';
 import 'views/addDayTask.dart';
 import 'views/addLogTask.dart';
 
+enum TaskItemsMenu {
+  edit,
+  delete,
+  complete
+}
 
 void main() {
   runApp(const MyApp());
@@ -81,7 +86,42 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Card(
                       child: ListTile(
                         title: Text('${task.title} | ${task.category} | ${task.chunkTime} min'),                   
-                        trailing: Icon(Icons.more_vert)
+                        trailing: PopupMenuButton<TaskItemsMenu>(
+                          icon: Icon(Icons.more_vert),
+                          onSelected: (TaskItemsMenu action) {
+                            if (action == TaskItemsMenu.delete) {
+                              dayTermTasks.removeAt(index);
+                              setState(() {
+                                
+                              });
+                            }
+                            else if (action == TaskItemsMenu.edit) {
+                              //
+                            }
+                            else if (action == TaskItemsMenu.complete) {
+                              setState(() {
+                                task.isComplete = true;
+                              });
+                            }
+
+                          },
+                          itemBuilder: (BuildContext context) {
+                            return [
+                              const PopupMenuItem(
+                                value: TaskItemsMenu.edit,
+                                child: Text('Edit'),
+                              ),
+                              const PopupMenuItem(
+                                value: TaskItemsMenu.delete,
+                                child: Text('Delete')
+                              ),
+                              const PopupMenuItem(
+                                value: TaskItemsMenu.complete,
+                                child: Text('Mark Complete')
+                                )
+                            ];
+                          }
+                        ),
                       ),
                     ),
                   );
