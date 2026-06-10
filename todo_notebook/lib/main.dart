@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'views/dayTermTab.dart';
 import 'views/longTermTab.dart';
 import 'views/addDayTask.dart';
-import 'views/addLogTask.dart';
-
+//import 'views/addLogTask.dart';
+import 'views/editDayTask.dart';
 enum TaskItemsMenu {
   edit,
   delete,
@@ -58,6 +58,25 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Future<void> editDayTask(int index) async {
+    final DayTask selectedTask = dayTermTasks[index];
+
+    final DayTask? editedTask = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditDayTaskPage(
+          task: selectedTask,
+        )      
+      )
+    );
+
+    if (editedTask!= null) {
+      setState(() {
+        dayTermTasks[index] = editedTask;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -92,18 +111,27 @@ class _MyHomePageState extends State<MyHomePage> {
                             if (action == TaskItemsMenu.delete) {
                               dayTermTasks.removeAt(index);
                               setState(() {
-                                
                               });
+                              const deleteSnackbar = SnackBar(content: Text('Task deleted'));
+                              ScaffoldMessenger.of(context).showSnackBar(deleteSnackbar);                             
                             }
                             else if (action == TaskItemsMenu.edit) {
-                              //
+                              editDayTask(index);                            
                             }
                             else if (action == TaskItemsMenu.complete) {
-                              setState(() {
-                                task.isComplete = true;
-                              });
+                              if (task.isComplete == false) {
+                                setState(() {
+                                  task.isComplete = true;
+                                  //ADD CARD CHANING COLOR HERE OR A STRIKETHROUGH THE CARD OR TEXT
+                                });
+                                const statusSnackbar = SnackBar(content: Text('Completed!'));
+                                ScaffoldMessenger.of(context).showSnackBar(statusSnackbar);
+                              }
+                              else {
+                                const statusSnackbar = SnackBar(content: Text('Task already completed'));
+                                ScaffoldMessenger.of(context).showSnackBar(statusSnackbar);                              
+                              }
                             }
-
                           },
                           itemBuilder: (BuildContext context) {
                             return [
