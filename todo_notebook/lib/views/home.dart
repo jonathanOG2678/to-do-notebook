@@ -4,10 +4,7 @@ import '../models/long_term_task.dart';
 import '../tabs/day_term_tab.dart';
 import '../tabs/long_term_tab.dart';
 import '../views/addDayTask.dart';
-//import 'views/addLogTask.dart';
 import '../views/editDayTask.dart';
-
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -75,13 +72,16 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       dayTermTasks.removeAt(index);
     });
-    
+    const deleteSnackbar = SnackBar(content: Text('Task deleted'));
+    ScaffoldMessenger.of(context).showSnackBar(deleteSnackbar); 
   }
 
   Future<void> completeDayTask(int index) async {
     setState(() {
       dayTermTasks[index].isComplete = true;
     });
+    const completeSnackbar = SnackBar(content: Text('Task completed!'));
+    ScaffoldMessenger.of(context).showSnackBar(completeSnackbar); 
   }
 
   @override
