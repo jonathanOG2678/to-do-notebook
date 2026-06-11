@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_notebook/views/addLongTask.dart';
 import '../models/day_term_task.dart';
 import '../models/long_term_task.dart';
 import '../tabs/day_term_tab.dart';
@@ -48,6 +49,22 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
   }
+
+  Future<void> addLongTask() async {
+    final LongTermTask? newTask = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AddLongTaskPage(),
+      ),
+    );
+
+    if (newTask != null) {
+      setState(() {
+        longTermTasks.add(newTask);
+      });
+    }
+  }
+
 
   Future<void> editDayTask(int index) async {
     final DayTask selectedTask = dayTermTasks[index];
@@ -110,7 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             LongTermTab(
               tasks: longTermTasks,
-              onAddTask: () {},
+              onAddTask: addLongTask,
               onEditTask: (index) {},
               onDeleteTask: (index) {},
               onCompleteTask: (index) {},              
