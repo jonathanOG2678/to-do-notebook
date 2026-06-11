@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dayTermTab.dart';
+import '../models/day_term_task.dart';
 
 class EditDayTaskPage extends StatefulWidget {
   final DayTask task;

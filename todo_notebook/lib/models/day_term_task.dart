@@ -10,4 +10,8 @@ class DayTask {
     required this.chunkTime,
     this.isComplete = false
   });
+
+  void toggleComplete() {
+    isComplete = !isComplete;
+  }
 }
