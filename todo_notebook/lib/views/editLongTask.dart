@@ -1,19 +1,28 @@
-
 import 'package:flutter/material.dart';
 import '../models/long_term_task.dart';
 
-
-class AddLongTaskPage extends StatefulWidget {
-  const AddLongTaskPage({super.key});
+class EditLongTaskPage extends StatefulWidget {
+  final LongTermTask task;
+  const EditLongTaskPage({super.key, required this.task});
 
   @override
-  State<AddLongTaskPage> createState() => _AddLongTaskPageState();
+  State<EditLongTaskPage> createState() => _EditLongTaskPageState();
 }
 
-class _AddLongTaskPageState extends State<AddLongTaskPage> {
+class _EditLongTaskPageState extends State<EditLongTaskPage> {
   final titleController = TextEditingController();
   final categoryController = TextEditingController();
   DateTime? selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+
+    titleController.text = widget.task.title;
+    categoryController.text = widget.task.category;
+    selectedDate = widget.task.dueDate;    
+  }
+
 
   @override
   void dispose() {
@@ -26,8 +35,8 @@ class _AddLongTaskPageState extends State<AddLongTaskPage> {
   Future<void> selectDate() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: selectedDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
+      initialDate: selectedDate,
+      firstDate: DateTime.now(), //maybe change to selectedDate?
       lastDate: DateTime(2100),
     );
     if (pickedDate != null){
@@ -40,25 +49,31 @@ class _AddLongTaskPageState extends State<AddLongTaskPage> {
   void saveTask() {
     final title = titleController.text.trim();
     final category = categoryController.text.trim();
-    final dueDate = selectedDate;
-    if (title.isEmpty || category.isEmpty || dueDate == null) {
+    final editedDueDate = selectedDate;
+
+    if (title.isEmpty || category.isEmpty || editedDueDate == null) {
       return;
     }
 
-    final newTask = LongTermTask(
+    final editedTask = LongTermTask(
       title: title,
       category: category,
-      dueDate: dueDate,
+      dueDate: selectedDate!,
+      isComplete: widget.task.isComplete,
     );
+    
+    const editSnackbar = SnackBar(content: Text('Task updated'));
+    ScaffoldMessenger.of(context).showSnackBar(editSnackbar); 
 
-    Navigator.pop(context, newTask);
+    Navigator.pop(context, editedTask);
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Day Task'),
+        title: const Text('Edit Long Term Task'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -88,11 +103,10 @@ class _AddLongTaskPageState extends State<AddLongTaskPage> {
                 : 'Due ${selectedDate!.month}/${selectedDate!.day}/${selectedDate!.year}',
                 ),
             ),
-
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: saveTask,
-              child: const Text('Save Task'),
+              child: const Text('Save Changes'),
             ),
           ],
         ),

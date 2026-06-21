@@ -31,7 +31,7 @@ class LongTermTab extends StatelessWidget{
             child: Card(
               child: ListTile(
                 title: Text(
-                  '${task.title} | ${task.category} | ${task.dueDate.month}-${task.dueDate.day}-${task.dueDate.year}',
+                  '${task.title} | ${task.category} | ${task.dueDate.month}/${task.dueDate.day}/${task.dueDate.year}',
                   style: TextStyle(
                     decoration: task.isComplete ? TextDecoration.lineThrough : TextDecoration.none,
                   ),

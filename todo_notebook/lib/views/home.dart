@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:todo_notebook/views/addLongTask.dart';
 import '../models/day_term_task.dart';
 import '../models/long_term_task.dart';
 import '../tabs/day_term_tab.dart';
 import '../tabs/long_term_tab.dart';
 import '../views/addDayTask.dart';
 import '../views/editDayTask.dart';
+import '../views/addLongTask.dart';
+import '../views/editLongTask.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -50,22 +51,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Future<void> addLongTask() async {
-    final LongTermTask? newTask = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const AddLongTaskPage(),
-      ),
-    );
-
-    if (newTask != null) {
-      setState(() {
-        longTermTasks.add(newTask);
-      });
-    }
-  }
-
-
   Future<void> editDayTask(int index) async {
     final DayTask selectedTask = dayTermTasks[index];
 
@@ -100,6 +85,58 @@ class _MyHomePageState extends State<MyHomePage> {
     const completeSnackbar = SnackBar(content: Text('Task completed!'));
     ScaffoldMessenger.of(context).showSnackBar(completeSnackbar); 
   }
+  //--------Long Term-----------//
+  Future<void> addLongTask() async {
+    final LongTermTask? newTask = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AddLongTaskPage(),
+      ),
+    );
+
+    if (newTask != null) {
+      setState(() {
+        longTermTasks.add(newTask);
+      });
+    }
+  }
+
+  Future<void> editLongTask(int index) async {
+    final LongTermTask selectedTask = longTermTasks[index];
+
+    final LongTermTask? editedTask = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditLongTaskPage(
+          task: selectedTask,
+        )      
+      )
+    );
+
+    if (editedTask!= null) {
+      setState(() {
+        longTermTasks[index] = editedTask;
+      });
+    }
+  }
+
+  Future<void> deleteLongTask(int index) async{
+    setState(() {
+      longTermTasks.removeAt(index);
+    });
+    const deleteSnackbar = SnackBar(content: Text('Task deleted'));
+    ScaffoldMessenger.of(context).showSnackBar(deleteSnackbar); 
+  }
+
+  Future<void> completeLongTask(int index) async {
+    setState(() {
+      longTermTasks[index].isComplete = true;
+    });
+    const completeSnackbar = SnackBar(content: Text('Task completed!'));
+    ScaffoldMessenger.of(context).showSnackBar(completeSnackbar); 
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -128,9 +165,9 @@ class _MyHomePageState extends State<MyHomePage> {
             LongTermTab(
               tasks: longTermTasks,
               onAddTask: addLongTask,
-              onEditTask: (index) {},
-              onDeleteTask: (index) {},
-              onCompleteTask: (index) {},              
+              onEditTask: editLongTask,
+              onDeleteTask: deleteLongTask,
+              onCompleteTask: completeLongTask,              
             ),
           ]
         ),
