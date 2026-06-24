@@ -46,6 +46,7 @@ class _EditDayTaskPageState extends State<EditDayTaskPage> {
       category: category,
       chunkTime: chunkTime,
       isComplete: widget.task.isComplete,
+      taskDate: widget.task.taskDate
     );
     
     const editSnackbar = SnackBar(content: Text('Task updated'));

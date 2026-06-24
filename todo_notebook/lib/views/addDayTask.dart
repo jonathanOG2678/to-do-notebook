@@ -25,6 +25,7 @@ class _AddDayTaskPageState extends State<AddDayTaskPage> {
     final title = titleController.text.trim();
     final category = categoryController.text.trim();
     final chunkTime = int.tryParse(chunkTimeController.text.trim());
+    final taskDate = DateTime.now();
 
     if (title.isEmpty || category.isEmpty || chunkTime == null) {
       return;
@@ -34,6 +35,7 @@ class _AddDayTaskPageState extends State<AddDayTaskPage> {
       title: title,
       category: category,
       chunkTime: chunkTime,
+      taskDate: taskDate
     );
 
     Navigator.pop(context, newTask);

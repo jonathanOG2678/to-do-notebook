@@ -3,12 +3,14 @@ class DayTask {
   String category;
   int chunkTime;
   bool isComplete;
+  DateTime taskDate;
 
   DayTask({
     required this.title,
     required this.category,
     required this.chunkTime,
-    this.isComplete = false
+    this.isComplete = false,
+    required this.taskDate,
   });
 
   void toggleComplete() {

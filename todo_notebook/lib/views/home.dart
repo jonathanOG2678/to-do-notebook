@@ -34,7 +34,31 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final List<DayTask> dayTermTasks = [];
   final List<LongTermTask> longTermTasks = [];
-  
+  DateTime selectedDate = DateTime.now();
+  final selectedDateTasks = [];
+
+  void goToPreviousDay() {
+    setState(() {
+      selectedDate = selectedDate.subtract(const Duration(days: 1));
+    });
+  }
+
+  void goToNextDay() {
+    setState(() {
+      selectedDate = selectedDate.add(const Duration(days: 1));
+    });
+  }
+
+  bool isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  List<DayTask> get selectedDateTaskList {
+    return dayTermTasks.where((task) {
+      return isSameDay(task.taskDate, selectedDate);
+    }).toList();
+  }
+
 
   Future<void> addDayTask() async {
     final DayTask? newTask = await Navigator.push(
@@ -47,12 +71,14 @@ class _MyHomePageState extends State<MyHomePage> {
     if (newTask != null) {
       setState(() {
         dayTermTasks.add(newTask);
+        selectedDate = DateTime.now(); //Go back to view neew task added
       });
     }
   }
 
-  Future<void> editDayTask(int index) async {
-    final DayTask selectedTask = dayTermTasks[index];
+  Future<void> editDayTask(DayTask task) async {
+    final DayTask selectedTask = task;
+    final int taskIndex = dayTermTasks.indexOf(task);
 
     final DayTask? editedTask = await Navigator.push(
       context,
@@ -65,22 +91,22 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (editedTask!= null) {
       setState(() {
-        dayTermTasks[index] = editedTask;
+        dayTermTasks[taskIndex] = editedTask;
       });
     }
   }
 
-  Future<void> deleteDayTask(int index) async{
+  Future<void> deleteDayTask(DayTask task) async{
     setState(() {
-      dayTermTasks.removeAt(index);
+      dayTermTasks.remove(task);
     });
     const deleteSnackbar = SnackBar(content: Text('Task deleted'));
     ScaffoldMessenger.of(context).showSnackBar(deleteSnackbar); 
   }
 
-  Future<void> completeDayTask(int index) async {
+  Future<void> completeDayTask(DayTask task) async {
     setState(() {
-      dayTermTasks[index].isComplete = true;
+      task.isComplete = true;
     });
     const completeSnackbar = SnackBar(content: Text('Task completed!'));
     ScaffoldMessenger.of(context).showSnackBar(completeSnackbar); 
@@ -156,11 +182,14 @@ class _MyHomePageState extends State<MyHomePage> {
         body: TabBarView(
           children: [
             DayTermTab(
-              tasks: dayTermTasks, 
+              tasks: selectedDateTaskList,
+              onPreviousDay: goToPreviousDay,
+              onNextDay: goToNextDay,
               onAddTask: addDayTask,
               onEditTask: editDayTask,
               onDeleteTask: deleteDayTask,
               onCompleteTask: completeDayTask,
+              selectedDate: selectedDate,
             ),
             LongTermTab(
               tasks: longTermTasks,
