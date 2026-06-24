@@ -36,6 +36,15 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<LongTermTask> longTermTasks = [];
   DateTime selectedDate = DateTime.now();
   final selectedDateTasks = [];
+ 
+  void goToToday() {
+    setState(() {
+      selectedDate = DateTime.now();
+      const completeSnackbar = SnackBar(content: Text('Moved to today'));
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(completeSnackbar); 
+    });
+  }
 
   void goToPreviousDay() {
     setState(() {
@@ -44,6 +53,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void goToNextDay() {
+    if (isSameDay(DateTime.now(), selectedDate)) {
+      const completeSnackbar = SnackBar(content: Text('Cannot view future'));
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(completeSnackbar); 
+      return; //Prevent the user to go to the future
+    } 
     setState(() {
       selectedDate = selectedDate.add(const Duration(days: 1));
     });
@@ -100,6 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       dayTermTasks.remove(task);
     });
+    ScaffoldMessenger.of(context).clearSnackBars();
     const deleteSnackbar = SnackBar(content: Text('Task deleted'));
     ScaffoldMessenger.of(context).showSnackBar(deleteSnackbar); 
   }
@@ -108,6 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       task.isComplete = true;
     });
+    ScaffoldMessenger.of(context).clearSnackBars();
     const completeSnackbar = SnackBar(content: Text('Task completed!'));
     ScaffoldMessenger.of(context).showSnackBar(completeSnackbar); 
   }
@@ -150,6 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       longTermTasks.removeAt(index);
     });
+    ScaffoldMessenger.of(context).clearSnackBars();
     const deleteSnackbar = SnackBar(content: Text('Task deleted'));
     ScaffoldMessenger.of(context).showSnackBar(deleteSnackbar); 
   }
@@ -158,6 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       longTermTasks[index].isComplete = true;
     });
+    ScaffoldMessenger.of(context).clearSnackBars();
     const completeSnackbar = SnackBar(content: Text('Task completed!'));
     ScaffoldMessenger.of(context).showSnackBar(completeSnackbar); 
   }
@@ -183,6 +202,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             DayTermTab(
               tasks: selectedDateTaskList,
+              onGoToday: goToToday,
               onPreviousDay: goToPreviousDay,
               onNextDay: goToNextDay,
               onAddTask: addDayTask,

@@ -11,6 +11,7 @@ class DayTermTab extends StatelessWidget{
   final DateTime selectedDate;
   final VoidCallback onPreviousDay;
   final VoidCallback onNextDay;
+  final VoidCallback onGoToday;
 
   const DayTermTab({
     super.key,
@@ -19,6 +20,7 @@ class DayTermTab extends StatelessWidget{
     required this.onEditTask,
     required this.onDeleteTask,
     required this.onCompleteTask,
+    required this.onGoToday,
     required this.onNextDay,
     required this.onPreviousDay,
     required this.selectedDate
@@ -31,10 +33,12 @@ class DayTermTab extends StatelessWidget{
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 10.0,  
             children: [
               IconButton.outlined(
                 onPressed: onPreviousDay,
-                icon: Icon(Icons.arrow_left)
+                icon: Icon(Icons.arrow_left),
+                tooltip: 'Click to go to previous day',
               ),
               Text(
                 '${selectedDate.month}/${selectedDate.day}/${selectedDate.year}',
@@ -44,10 +48,20 @@ class DayTermTab extends StatelessWidget{
               ),
               IconButton.outlined(
                 onPressed: onNextDay,
-                icon: Icon(Icons.arrow_right)
+                icon: Icon(Icons.arrow_right),
+                tooltip: 'Click to go to next day',
               ),
+              Padding(padding:EdgeInsetsGeometry.only(left: 20),
+              child: IconButton.outlined(
+                onPressed: onGoToday,
+                icon: Icon(Icons.calendar_today),
+                tooltip: 'Click to go to today',
+              ),
+              
+              )
             ],
           ),
+
           Expanded(
             child: ListView.builder(
               itemCount: tasks.length,
