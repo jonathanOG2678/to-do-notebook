@@ -104,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
       )
     );
 
-    if (editedTask!= null) {
+    if (editedTask!= null && taskIndex != -1) {
       setState(() {
         dayTermTasks[taskIndex] = editedTask;
       });

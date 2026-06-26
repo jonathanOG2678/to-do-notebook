@@ -51,13 +51,13 @@ class DayTermTab extends StatelessWidget{
                 icon: Icon(Icons.arrow_right),
                 tooltip: 'Click to go to next day',
               ),
-              Padding(padding:EdgeInsetsGeometry.only(left: 20),
-              child: IconButton.outlined(
-                onPressed: onGoToday,
-                icon: Icon(Icons.calendar_today),
-                tooltip: 'Click to go to today',
+              Padding(
+                padding:EdgeInsets.only(left: 20),
+                child: IconButton.outlined(
+                  onPressed: onGoToday,
+                  icon: Icon(Icons.calendar_today),
+                  tooltip: 'Click to go to today',
               ),
-              
               )
             ],
           ),

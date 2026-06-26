@@ -11,11 +11,4 @@ class LongTermTask {
     this.isComplete = false
   });
 
-  // void toggleComplete() {
-  //   isComplete = !isComplete;
-  // }
-
-  // String get formattedDueDate() {
-  //   return '${dueDate.month}/${dueDate.day}';
-  // }
 }
