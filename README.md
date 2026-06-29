@@ -10,7 +10,6 @@ An app where one can write stuff down daily and long term to keep track of what 
 - Has two tabs where it shows long term tasks and current day tasks
 - Has the ability to cross out tasks when clicked on
 - Have the ability to go back to previous days to see those day's tasks
-- Have reminder for long term tasks?
 - Ability to add/edit/remove tasks (Task Name, Category, Time Spent)
 - When opening, shows the current day
 - Store data locally
