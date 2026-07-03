@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/day_term_task.dart';
 import '../models/long_term_task.dart';
@@ -36,7 +37,6 @@ class _MyHomePageState extends State<MyHomePage> {
   List<DayTask> dayTermTasks = [];
   final List<LongTermTask> longTermTasks = [];
   DateTime selectedDate = DateTime.now();
-  //final selectedDateTasks = [];
   final _storage = SqliteDatabase();
   bool databaseReady = false;
  
@@ -44,20 +44,16 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    try {
-      _storage.open('day_tasks_v3.db').then((_) async {
-        await loadDayTasksForSelectedDate();
-      
-        setState(() {
-            databaseReady = true;
-          });      
-      }); 
-    } catch (e) {
-      print('Database initialization error: $e');
-
+    _storage.open('day_tasks_v3.db').then((_) async {
+      await loadDayTasksForSelectedDate();
       setState(() {
-        databaseReady = true;    });
-    }
+        databaseReady = true;
+      });      
+    }); 
+
+    setState(() {
+      databaseReady = true;
+    });
   }
 
   @override
@@ -69,7 +65,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> loadDayTasksForSelectedDate() async {
       final tasks = await _storage.getDayTasksForDay(selectedDate);
       
+      if (kDebugMode) {
       print('Loaded ${tasks.length} tasks for ${DayTask.dateKey(selectedDate)}');
+      }
       setState(() {
         dayTermTasks = tasks;
       });
@@ -106,19 +104,11 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     await loadDayTasksForSelectedDate();
-
   }
 
   bool isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
-
-  // List<DayTask> get selectedDateTaskList {
-  //   return dayTermTasks.where((task) {
-  //     return isSameDay(task.taskDate, selectedDate);
-  //   }).toList();
-  // }
-
 
   Future<void> addDayTask() async {
     final DayTask? newTask = await Navigator.push(
