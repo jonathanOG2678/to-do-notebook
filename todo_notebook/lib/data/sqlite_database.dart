@@ -20,7 +20,7 @@ const String longTaskTable = 'long_tasks';
 class SqliteDatabase {
   late Database db;
 
-  //The following function skeleton is courtesy by Professor Shelly Wong
+  //The following function skeleton is courtesy of Professor Shelly Wong
   Future open(String path) async {
     db = await openDatabase(
       p.join(await getDatabasesPath(), path), version: 1,
@@ -36,18 +36,19 @@ class SqliteDatabase {
           )
           ''');
 
-        // await db.execute('''
-        //   CREATE TABLE $longTaskTable (
-        //     id INTEGER PRIMARY KEY AUTOINCREMENT,
-        //     title TEXT NOT NULL,
-        //     category TEXT NOT NULL,
-        //     is_complete INTEGER NOT NULL,
-        //     due_date TEXT NOT NULL)
-        //   ''');          
+        await db.execute('''
+          CREATE TABLE $longTaskTable (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            category TEXT NOT NULL,
+            is_complete INTEGER NOT NULL,
+            due_date TEXT NOT NULL)
+          ''');          
       }
     );
   }
 
+  //Day Term Tasks
   Future<DayTask> insertDayTask(DayTask task) async {
     task.id = await db.insert(
       dayTaskTable,
@@ -85,6 +86,44 @@ class SqliteDatabase {
       whereArgs: [task.id]
     );
   }
+
+  //-----------Long Term Tasks-------------//
+  Future<LongTermTask> insertLongTask(LongTermTask task) async {
+    task.id = await db.insert(
+      longTaskTable,
+      task.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    return task;
+  }
+
+  Future<void> updateLongTask(LongTermTask task) async {
+    await db.update(
+      longTaskTable,
+      task.toMap(),
+      where: 'id = ?',
+      whereArgs: [task.id]  
+    );
+  }
+
+  Future<void> deleteLongTask(LongTermTask task) async {
+    await db.delete(
+      longTaskTable,
+      where: 'id = ?',
+      whereArgs: [task.id]
+    );
+  } 
+
+  Future<List<LongTermTask>> getLongTasks() async {
+    final maps = await db.query(
+      longTaskTable,
+      orderBy: 'due_date ASC'
+    );
+
+    return maps.map((map) {
+      return LongTermTask.fromMap(map);
+    }).toList();
+  } 
 
   Future close() async => db.close();
 

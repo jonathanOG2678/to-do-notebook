@@ -35,7 +35,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<DayTask> dayTermTasks = [];
-  final List<LongTermTask> longTermTasks = [];
+  List<LongTermTask> longTermTasks = [];
   DateTime selectedDate = DateTime.now();
   final _storage = SqliteDatabase();
   bool databaseReady = false;
@@ -44,16 +44,13 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    _storage.open('day_tasks_v3.db').then((_) async {
+    _storage.open('day_tasks_v4.db').then((_) async {
       await loadDayTasksForSelectedDate();
+      await loadLongTasks();
       setState(() {
         databaseReady = true;
       });      
     }); 
-
-    setState(() {
-      databaseReady = true;
-    });
   }
 
   @override
@@ -70,6 +67,17 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       setState(() {
         dayTermTasks = tasks;
+      });
+  }
+
+  Future<void> loadLongTasks() async {
+      final tasks = await _storage.getLongTasks();
+      
+      if (kDebugMode) {
+      print('Loaded ${tasks.length} long term tasks');
+      }
+      setState(() {
+        longTermTasks = tasks;
       });
   }
 
@@ -163,11 +171,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> completeDayTask(DayTask task) async {
-    setState(() {
-      task.isComplete = true;
-    });
+    task.isComplete = true;
 
     await _storage.updateDayTask(task);
+    await loadDayTasksForSelectedDate();
 
     ScaffoldMessenger.of(context).clearSnackBars();
     const completeSnackbar = SnackBar(content: Text('Task completed!'));
@@ -183,9 +190,8 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     if (newTask != null) {
-      setState(() {
-        longTermTasks.add(newTask);
-      });
+      await _storage.insertLongTask(newTask);
+      await loadLongTasks();
     }
   }
 
@@ -202,25 +208,28 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     if (editedTask!= null) {
-      setState(() {
-        longTermTasks[index] = editedTask;
-      });
+      await _storage.updateLongTask(editedTask);
+      await loadLongTasks();
     }
   }
 
   Future<void> deleteLongTask(int index) async{
-    setState(() {
-      longTermTasks.removeAt(index);
-    });
+    final task = longTermTasks[index];
+    await _storage.deleteLongTask(task);
+    await loadLongTasks();
+
     ScaffoldMessenger.of(context).clearSnackBars();
     const deleteSnackbar = SnackBar(content: Text('Task deleted'));
     ScaffoldMessenger.of(context).showSnackBar(deleteSnackbar); 
   }
 
   Future<void> completeLongTask(int index) async {
-    setState(() {
-      longTermTasks[index].isComplete = true;
-    });
+    final task = longTermTasks[index];
+    task.isComplete = true;
+    
+    await _storage.updateLongTask(task);
+    await loadLongTasks();
+
     ScaffoldMessenger.of(context).clearSnackBars();
     const completeSnackbar = SnackBar(content: Text('Task completed!'));
     ScaffoldMessenger.of(context).showSnackBar(completeSnackbar); 

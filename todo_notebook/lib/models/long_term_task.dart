@@ -24,6 +24,17 @@ class LongTermTask {
     };
   }
 
+  //factory is darts way to work with an object first then returns it?
+  factory LongTermTask.fromMap(Map<String, Object?> map) {
+    return LongTermTask(
+      id: map['id'] as int?,
+      title: map['title'] as String,
+      category: map['category'] as String,
+      isComplete: map['is_complete'] == 1,
+      dueDate: DateTime.parse(map['due_date'] as String),
+    );
+  }
+
 
   static String dateKey(DateTime date) {
     final year = date.year.toString().padLeft(4, '0'); //fixes the length for uniform dates
