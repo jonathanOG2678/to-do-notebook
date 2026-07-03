@@ -7,6 +7,7 @@ import '../views/addDayTask.dart';
 import '../views/editDayTask.dart';
 import '../views/addLongTask.dart';
 import '../views/editLongTask.dart';
+import '../data/sqlite_database.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -32,27 +33,68 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<DayTask> dayTermTasks = [];
+  List<DayTask> dayTermTasks = [];
   final List<LongTermTask> longTermTasks = [];
   DateTime selectedDate = DateTime.now();
-  final selectedDateTasks = [];
+  //final selectedDateTasks = [];
+  final _storage = SqliteDatabase();
+  bool databaseReady = false;
  
-  void goToToday() {
-    setState(() {
-      selectedDate = DateTime.now();
-      const completeSnackbar = SnackBar(content: Text('Moved to today'));
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(completeSnackbar); 
-    });
+  @override
+  void initState() {
+    super.initState();
+
+    try {
+      _storage.open('day_tasks_v3.db').then((_) async {
+        await loadDayTasksForSelectedDate();
+      
+        setState(() {
+            databaseReady = true;
+          });      
+      }); 
+    } catch (e) {
+      print('Database initialization error: $e');
+
+      setState(() {
+        databaseReady = true;    });
+    }
   }
 
-  void goToPreviousDay() {
+  @override
+  void dispose() {
+    _storage.close();
+    super.dispose();
+  }
+
+  Future<void> loadDayTasksForSelectedDate() async {
+      final tasks = await _storage.getDayTasksForDay(selectedDate);
+      
+      print('Loaded ${tasks.length} tasks for ${DayTask.dateKey(selectedDate)}');
+      setState(() {
+        dayTermTasks = tasks;
+      });
+  }
+
+  Future<void> goToToday() async{
+    setState(() {
+      selectedDate = DateTime.now();
+    });
+    
+    await loadDayTasksForSelectedDate();
+    const completeSnackbar = SnackBar(content: Text('Moved to today'));
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(completeSnackbar); 
+  }
+
+  Future<void> goToPreviousDay() async {
     setState(() {
       selectedDate = selectedDate.subtract(const Duration(days: 1));
     });
+
+    await loadDayTasksForSelectedDate();
   }
 
-  void goToNextDay() {
+  Future<void> goToNextDay() async {
     if (isSameDay(DateTime.now(), selectedDate)) {
       const completeSnackbar = SnackBar(content: Text('Cannot view future'));
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -62,17 +104,20 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       selectedDate = selectedDate.add(const Duration(days: 1));
     });
+
+    await loadDayTasksForSelectedDate();
+
   }
 
   bool isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
-  List<DayTask> get selectedDateTaskList {
-    return dayTermTasks.where((task) {
-      return isSameDay(task.taskDate, selectedDate);
-    }).toList();
-  }
+  // List<DayTask> get selectedDateTaskList {
+  //   return dayTermTasks.where((task) {
+  //     return isSameDay(task.taskDate, selectedDate);
+  //   }).toList();
+  // }
 
 
   Future<void> addDayTask() async {
@@ -84,10 +129,13 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     if (newTask != null) {
+      await _storage.insertDayTask(newTask);
+
       setState(() {
-        dayTermTasks.add(newTask);
         selectedDate = DateTime.now(); //Go back to view neew task added
       });
+
+      await loadDayTasksForSelectedDate();
     }
   }
 
@@ -105,6 +153,8 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     if (editedTask!= null && taskIndex != -1) {
+      await _storage.updateDayTask(editedTask);
+
       setState(() {
         dayTermTasks[taskIndex] = editedTask;
       });
@@ -112,6 +162,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> deleteDayTask(DayTask task) async{
+    await _storage.deleteDayTask(task);
+    
     setState(() {
       dayTermTasks.remove(task);
     });
@@ -124,6 +176,9 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       task.isComplete = true;
     });
+
+    await _storage.updateDayTask(task);
+
     ScaffoldMessenger.of(context).clearSnackBars();
     const completeSnackbar = SnackBar(content: Text('Task completed!'));
     ScaffoldMessenger.of(context).showSnackBar(completeSnackbar); 
@@ -198,10 +253,11 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         ),
-        body: TabBarView(
+        body: databaseReady
+        ? TabBarView(
           children: [
             DayTermTab(
-              tasks: selectedDateTaskList,
+              tasks: dayTermTasks,//selectedDateTaskList,
               onGoToday: goToToday,
               onPreviousDay: goToPreviousDay,
               onNextDay: goToNextDay,
@@ -219,7 +275,10 @@ class _MyHomePageState extends State<MyHomePage> {
               onCompleteTask: completeLongTask,              
             ),
           ]
-        ),
+        )
+        : const Center(
+          child: CircularProgressIndicator(),
+        ), 
       ),
     );
   }

@@ -1,36 +1,10 @@
-import 'dart:async';
 import 'package:path/path.dart' as p; //conflicted with BuildContext
 import 'package:sqflite/sqflite.dart';
+import '../models/day_term_task.dart';
+import '../models/long_term_task.dart';
 
-class DayTask {
-  int? id;
-  String title;
-  String category;
-  int chunkTime;
-  bool isComplete;
-  DateTime taskDate;
-
-  DayTask({
-    this.id,
-    required this.title,
-    required this.category,
-    required this.chunkTime,
-    this.isComplete = false,
-    required this.taskDate
-  });
-
-  Map<String, Object?> toMap() {
-    return {
-      'id': id,
-      'title': title,
-      'category': category,
-      'chunk_time': chunkTime,
-      'is_complete': isComplete? 1 : 0,
-      'task_date': dateKey(taskDate),
-    };
-  }
-
-  //Add fromMap
+const String dayTaskTable = 'day_tasks';
+const String longTaskTable = 'long_tasks';
 
   /*
   - A Database instance
@@ -43,47 +17,75 @@ class DayTask {
   - A method to create a Counter and write the data to the tableCounter
   - A method to read data into the file
    */
+class SqliteDatabase {
+  late Database db;
 
-  static String dateKey(DateTime date) {
-    final year = date.year.toString().padLeft(4, '0'); //fixes the length for uniform dates
-    final month = date.month.toString().padLeft(2, '0');
-    final day = date.day.toString().padLeft(2, '0'); 
+  //The following function skeleton is courtesy by Professor Shelly Wong
+  Future open(String path) async {
+    db = await openDatabase(
+      p.join(await getDatabasesPath(), path), version: 1,
+      onCreate: (Database db, int version) async {
+        await db.execute('''
+          CREATE TABLE $dayTaskTable (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            category TEXT NOT NULL,
+            chunk_time INTEGER NOT NULL,
+            is_complete INTEGER NOT NULL,
+            task_date TEXT NOT NULL
+          )
+          ''');
 
-    return '$year-$month-$day';
-  }
-}
-
-
-class LongTask {
-  int? id;
-  String title;
-  String category;
-  bool isComplete;
-  DateTime dueDate;
-
-  LongTask({
-    this.id,
-    required this.title,
-    required this.category,
-    this.isComplete = false,
-    required this.dueDate,
-  });
-
-  Map<String, Object?> toMap() {
-    return {
-      'id': id,
-      'title': title,
-      'category': category,
-      'is_complete': isComplete? 1 : 0,
-      'due_date': dateKey(dueDate),
-    };
+        // await db.execute('''
+        //   CREATE TABLE $longTaskTable (
+        //     id INTEGER PRIMARY KEY AUTOINCREMENT,
+        //     title TEXT NOT NULL,
+        //     category TEXT NOT NULL,
+        //     is_complete INTEGER NOT NULL,
+        //     due_date TEXT NOT NULL)
+        //   ''');          
+      }
+    );
   }
 
-  static String dateKey(DateTime date) {
-    final year = date.year.toString().padLeft(4, '0'); //fixes the length for uniform dates
-    final month = date.month.toString().padLeft(2, '0');
-    final day = date.month.toString().padLeft(2, '0'); 
-
-    return '$year-$month-$day';
+  Future<DayTask> insertDayTask(DayTask task) async {
+    task.id = await db.insert(
+      dayTaskTable,
+      task.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    return task;
   }
+
+  Future<List<DayTask>> getDayTasksForDay(DateTime selectedDate) async {
+    final maps = await db.query(
+      dayTaskTable,
+      where: 'task_date = ?',
+      whereArgs: [DayTask.dateKey(selectedDate)],
+    );
+
+    return maps.map((map) {
+      return DayTask.fromMap(map);
+    }).toList();
+  }
+
+  Future<void> updateDayTask(DayTask task) async {
+    await db.update(
+      dayTaskTable,
+      task.toMap(),
+      where: 'id = ?',
+      whereArgs: [task.id]  
+    );
+  }
+
+  Future<void> deleteDayTask(DayTask task) async {
+    await db.delete(
+      dayTaskTable,
+      where: 'id = ?',
+      whereArgs: [task.id]
+    );
+  }
+
+  Future close() async => db.close();
+
 }
