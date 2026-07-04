@@ -56,6 +56,7 @@ class _EditLongTaskPageState extends State<EditLongTaskPage> {
     }
 
     final editedTask = LongTermTask(
+      id: widget.task.id,
       title: title,
       category: category,
       dueDate: selectedDate!,
